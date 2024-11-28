@@ -9,7 +9,7 @@ const userController = require("../controllers/userController");
 router.post("/user", userController.create);
 
 router.post(
-  "/login",
+  "/user/login",
   passport.authenticate("local", { session: false }),
   (req, res, next) => {
     const payload = {
@@ -40,7 +40,7 @@ router.put(
 router.delete(
   "/users/:id",
   passport.authenticate("jwt", { session: false }),
-  userController.delete
+  userController.deleteUser
 );
 
 module.exports = router;
