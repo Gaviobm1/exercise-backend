@@ -66,8 +66,8 @@ const updateExercise = async (id, exercise) => {
     multipleWeights,
   } = exercise;
 
-  const newExercise = await db.query(
-    "UPDATE exercises SET name = $1, type = $2, notes = $3, reps = $4, sets = $5, time = $6, distance = $7, kcal = $8, easy = $9, weight = $10, multiple_weights = $11 WHERE id = $12 RETURNING name",
+  await db.query(
+    "UPDATE exercises SET name = COALESCE($1, NAME), type = COALESCE($2, type), notes = COALESCE($3, notes), reps = COALESCE($4, reps), sets = COALESCE($5, sets), time = COALESCE($6, time), distance = COALESCE($7, distance), kcal = COALESCE($8, kcal), easy = COALESCE($9, easy), weight = COALESCE($10, weight), multiple_weights = COALESCE($11, multiple_weights) WHERE id = $12",
     [
       name,
       type,
@@ -83,7 +83,11 @@ const updateExercise = async (id, exercise) => {
       id,
     ]
   );
-  return newExercise;
+  const updatedExercise = await db.query(
+    "SELECT * FROM exercises WHERE id = $1",
+    [id]
+  );
+  return updatedExercise.rows[0];
 };
 
 const deleteExercises = async (workoutId) => {

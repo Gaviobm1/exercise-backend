@@ -7,7 +7,7 @@ const addExercise = async (req, res, next) => {
 };
 
 const deleteExercise = async (req, res, next) => {
-  const id = req.params.id;
+  const id = req.body.exerciseId;
   const deleted = await exerciseDb.deleteExercise(id);
   return res.json(deleted);
 };
@@ -19,21 +19,22 @@ const deleteExercises = async (req, res, next) => {
 };
 
 const updateExercise = async (req, res, next) => {
-  const id = req.params.id;
-  const updated = await exerciseDb.updateExercise(id, req.body);
+  const id = req.body.exerciseId;
+  const exerciseData = req.body;
+  const updated = await exerciseDb.updateExercise(id, exerciseData);
   return res.json(updated);
 };
 
 const getExercise = async (req, res, next) => {
-  const id = req.params.id;
+  const id = req.body.exerciseId;
   const exercise = await exerciseDb.getExercise(id);
   return res.json(exercise);
 };
 
-const getExercises = async (res, res, next) => {
-  const workoutId = req.body;
+const getExercises = async (req, res, next) => {
+  const workoutId = req.body.workoutId;
   const exercises = await exerciseDb.getExercises(workoutId);
-  return res.json(exercises);
+  res.json(exercises);
 };
 
 module.exports = {

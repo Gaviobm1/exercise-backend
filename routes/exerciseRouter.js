@@ -1,42 +1,42 @@
 const express = require("express");
 const router = express.Router();
-const workoutController = require("../controllers/workoutController");
+const exerciseController = require("../controllers/exerciseController");
 const passport = require("passport");
 
 router.get(
-  "/workout/:id",
+  "/exercise",
   passport.authenticate("jwt", { session: false }),
-  workoutController.getWorkout
+  exerciseController.getExercises
 );
 
 router.get(
-  "/workout",
+  "/exercise/:id",
   passport.authenticate("jwt", { session: false }),
-  workoutController.getWorkouts
+  exerciseController.getExercise
 );
 
 router.post(
-  "/workout",
+  "/exercise",
   passport.authenticate("jwt", { session: false }),
-  workoutController.postWorkout
+  exerciseController.addExercise
 );
 
 router.put(
-  "/workout/:id",
+  "/exercise",
   passport.authenticate("jwt", { session: false }),
-  workoutController.updateWorkout
+  exerciseController.updateExercise
 );
 
 router.delete(
-  "/workout/:id",
+  "/exercise",
   passport.authenticate("jwt", { session: false }),
-  workoutController.deleteWorkout
+  exerciseController.deleteExercises
 );
 
 router.delete(
-  "/workout",
+  "/exercise/:id",
   passport.authenticate("jwt", { session: false }),
-  workoutController.deleteWorkouts
+  exerciseController.deleteExercise
 );
 
 module.exports = router;

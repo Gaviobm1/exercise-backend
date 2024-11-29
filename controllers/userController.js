@@ -2,10 +2,13 @@ const asyncHandler = require("express-async-handler");
 const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 const { isNotEmpty } = require("../helpers");
-const db = require("../db/userQueries");
+const userDb = require("../db/userQueries");
+const workoutDb = require("../db/workoutQueries");
+const exerciseDb = require("../db/exerciseQueries");
+const jwt = require("jsonwebtoken");
 
 const checkValidEmail = async (email) => {
-  const { rowCount } = await db.findUser(email);
+  const { rowCount } = await userDb.findUser(email);
   return rowCount === 0 ? true : false;
 };
 
@@ -59,36 +62,69 @@ const create = [
       if (isNotEmpty(errors)) {
         res.json({ errors: errors.array() });
       }
-      const newUser = await db.insertUser(user);
-      req.logIn(newUser, (err) => {
-        if (err) {
-          return next(err);
-        }
-        res.json();
+      const newUser = await userDb.insertUser(user);
+      const payload = {
+        id: newUser.id,
+        email: newUser.email,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+      };
+      const token = jwt.sign(payload, process.env.SECRET_KEY, {
+        expiresIn: "12h",
       });
+      return res.json({ token });
     });
   }),
 ];
 
+const login = asyncHandler(async (req, res, next) => {
+  const { email, password } = req.body;
+  const user = await userDb.findUser(email);
+  if (!user) {
+    res.json("User not found");
+  }
+  bcrypt
+    .compare(password, user.password)
+    .then((isMatch) => {
+      if (isMatch) {
+        const payload = {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        };
+        const token = jwt.sign(payload, process.env.SECRET_KEY, {
+          expiresIn: "12h",
+        });
+        return res.json({ token });
+      } else {
+        return res.json("Invalid credentials");
+      }
+    })
+    .catch((err) => next(err));
+});
+
 const deleteUser = asyncHandler(async (req, res, next) => {
-  const id = req.user.id;
-  const deleted = await db.deleteUser(id);
-  res.json(deleted);
+  const userId = req.user.id;
+  const deleted = await userDb.deleteUser(userId);
+  return res.json(deleted);
 });
 
 const getUser = asyncHandler(async (req, res, next) => {
   const id = req.user.id;
-  const user = await db.findById(id);
-  res.json(user);
+  const user = await userDb.findById(id);
+  return res.json(user);
 });
 
 const updateUser = asyncHandler(async (req, res, next) => {
-  const user = await db.updateUser(req.user);
-  res.json(user);
+  const newData = req.body;
+  const user = await userDb.updateUser(newData);
+  return res.json(user);
 });
 
 module.exports = {
   create,
+  login,
   deleteUser,
   getUser,
   updateUser,

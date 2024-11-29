@@ -1,11 +1,12 @@
 const userDb = require("../db/userQueries");
 const workoutDb = require("../db/workoutQueries");
+const exerciseDb = require("../db/exerciseQueries");
 const asyncHandler = require("express-async-handler");
 
 const validWorkout = asyncHandler(async (req) => {
   const workoutId = req.params.id;
   const userId = req.user.id;
-  const workout = await workoutDb.getWorkout(workoutDb);
+  const workout = await workoutDb.getWorkout(workoutId);
   if (workout.user_id !== userId) {
     return false;
   }
@@ -20,6 +21,11 @@ const postWorkout = asyncHandler(async (req, res, next) => {
 const getWorkouts = asyncHandler(async (req, res, next) => {
   const workouts = await workoutDb.getWorkouts(req.user.id);
   return res.json(workouts);
+});
+
+const getWorkoutId = asyncHandler(async (req, res, next) => {
+  const workouts = await workoutDb.getWorkoutIds(req.body.id);
+  res.json(workouts);
 });
 
 const getWorkout = asyncHandler(async (req, res, next) => {
@@ -42,16 +48,23 @@ const updateWorkout = asyncHandler(async (req, res, next) => {
 });
 
 const deleteWorkout = asyncHandler(async (req, res, next) => {
-  const isValid = this.validWorkout(req);
+  const isValid = validWorkout(req);
   if (!isValid) {
     return res.json("Invalid user");
   }
+  await exerciseDb.deleteExercises(req.params.id);
   const deleted = await workoutDb.deleteWorkout(req.params.id);
   return res.json(deleted);
 });
 
 const deleteWorkouts = asyncHandler(async (req, res, next) => {
-  const deleted = await workoutDb.deleteWorkouts(req.user.id);
+  const userId = req.user.id;
+  const workoutIds = await workoutDb.getWorkoutIds(userId);
+  for await (const workoutId of workoutIds) {
+    const { id } = workoutId;
+    await exerciseDb.deleteExercises(id);
+  }
+  const deleted = await workoutDb.deleteWorkouts(userId);
   return res.json(deleted);
 });
 
@@ -59,6 +72,7 @@ module.exports = {
   postWorkout,
   getWorkout,
   getWorkouts,
+  getWorkoutId,
   updateWorkout,
   deleteWorkout,
   deleteWorkouts,

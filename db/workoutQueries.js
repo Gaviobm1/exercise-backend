@@ -7,6 +7,14 @@ const getWorkouts = async (userId) => {
   return workouts.rows;
 };
 
+const getWorkoutIds = async (userId) => {
+  const workouts = await db.query(
+    "SELECT id FROM workouts WHERE user_id = $1",
+    [userId]
+  );
+  return workouts.rows;
+};
+
 const getWorkout = async (id) => {
   const workout = await db.query("SELECT * FROM workouts WHERE id = $1", [id]);
   return workout.rows[0];
@@ -46,6 +54,7 @@ const deleteWorkouts = async (userId) => {
 module.exports = {
   getWorkout,
   getWorkouts,
+  getWorkoutIds,
   postWorkout,
   updateWorkout,
   deleteWorkout,
