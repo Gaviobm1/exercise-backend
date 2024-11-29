@@ -1,33 +1,44 @@
 const db = require("./postgreSQL.js");
 
-class User {
-  findUser = async (email) => {
-    return await db.query("SELECT * FROM users WHERE email = $1", [email]);
-  };
+const findUser = async (email) => {
+  const user = await db.query("SELECT * FROM users WHERE email = $1", [email]);
+  return user.rows[0];
+};
 
-  findById = async (id) => {
-    const data = await db.query("SELECT * FROM users WHERE id = $1", [id]);
-    return data.rows[0];
-  };
+const findById = async (id) => {
+  const data = await db.query(
+    "SELECT id, first_name, last_name, email FROM users WHERE id = $1",
+    [id]
+  );
+  return data.rows[0];
+};
 
-  insertUser = async (user) =>
-    await db.query(
-      "INSERT INTO users (first_name, last_name, email, password) VALUES ($1, $2, $3, $4)",
-      [user.firstName, user.lastName, user.email, user.password]
-    );
+const insertUser = async (user) => {
+  const newUser = await db.query(
+    "INSERT INTO users (first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING id, first_name, last_name, email",
+    [user.firstName, user.lastName, user.email, user.password]
+  );
+  return newUser.rows[0];
+};
 
-  deleteUser = async (id) => {
-    const deleted = await db.query("DELETE FROM users WHERE id = $1", [id]);
-  };
+const deleteUser = async (id) => {
+  const deleted = await db.query("DELETE FROM users WHERE id = $1", [id]);
+  return deleted.rowCount;
+};
 
-  updateUser = async (user) => {
-    const { firstName, lastName, email } = user;
-    const updated = await db.query(
-      "UPDATE users SET first_name = $1, last_name = $2, email = $3",
-      [firstName, lastName, email]
-    );
-    return updated;
-  };
-}
+const updateUser = async (user) => {
+  const { first_name, last_name, email, id } = user;
+  const updated = await db.query(
+    "UPDATE users SET first_name = COALESCE($1, first_name), last_name = COALESCE($2, last_name), email = COALESCE($3, email) WHERE id = $4 RETURNING id, first_name, last_name, email",
+    [first_name, last_name, email, id]
+  );
+  return updated.rows[0];
+};
 
-module.exports = new User();
+module.exports = {
+  findUser,
+  findById,
+  insertUser,
+  deleteUser,
+  updateUser,
+};
