@@ -10,7 +10,12 @@ const passport = require("passport");
 
 passport.use(jwtStrategy);
 
-app.use(cors());
+app.use(
+  cors({
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Authorization", "Content-Type"],
+  })
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

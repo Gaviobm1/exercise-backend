@@ -7,15 +7,20 @@ const validWorkout = asyncHandler(async (req) => {
   const workoutId = req.params.id;
   const userId = req.user.id;
   const workout = await workoutDb.getWorkout(workoutId);
-  if (workout.user_id !== userId) {
+
+  if (!workout || workout.user_id !== userId) {
     return false;
   }
   return true;
 });
 
 const postWorkout = asyncHandler(async (req, res, next) => {
-  const newWorkout = await workoutDb.postWorkout(req.user.id);
-  return newWorkout;
+  console.log(req.body);
+  const newWorkout = await workoutDb.postWorkout(
+    req.user.id,
+    req.body && req.body.date
+  );
+  return res.json(newWorkout);
 });
 
 const getWorkouts = asyncHandler(async (req, res, next) => {
@@ -38,7 +43,7 @@ const getWorkout = asyncHandler(async (req, res, next) => {
 });
 
 const updateWorkout = asyncHandler(async (req, res, next) => {
-  const isValid = this.validWorkout(req);
+  const isValid = validWorkout(req);
   if (!isValid) {
     return res.json("Invalid user");
   }

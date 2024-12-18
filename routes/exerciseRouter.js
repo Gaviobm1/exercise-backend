@@ -2,9 +2,12 @@ const express = require("express");
 const router = express.Router();
 const exerciseController = require("../controllers/exerciseController");
 const passport = require("passport");
+const multer = require("multer");
+
+const upload = multer();
 
 router.get(
-  "/exercise",
+  "/exercise/:workoutId",
   passport.authenticate("jwt", { session: false }),
   exerciseController.getExercises
 );
@@ -18,12 +21,14 @@ router.get(
 router.post(
   "/exercise",
   passport.authenticate("jwt", { session: false }),
+  upload.none(),
   exerciseController.addExercise
 );
 
 router.put(
-  "/exercise",
+  "/exercise/:id",
   passport.authenticate("jwt", { session: false }),
+  upload.none(),
   exerciseController.updateExercise
 );
 

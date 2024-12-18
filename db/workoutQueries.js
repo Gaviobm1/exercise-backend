@@ -20,10 +20,11 @@ const getWorkout = async (id) => {
   return workout.rows[0];
 };
 
-const postWorkout = async (userId, date = Date.now()) => {
+const postWorkout = async (userId, date = new Date()) => {
+  const dateInfo = new Date(date);
   const newWorkout = await db.query(
     "INSERT INTO workouts (user_id, date) VALUES ($1, $2) RETURNING id, date",
-    [userId, date]
+    [userId, dateInfo]
   );
   return newWorkout.rows[0];
 };
@@ -31,7 +32,7 @@ const postWorkout = async (userId, date = Date.now()) => {
 const updateWorkout = async (id, date) => {
   const updated = await db.query(
     "UPDATE workouts SET date = $1 WHERE id = $2 RETURNING id, date",
-    [id, date]
+    [date, id]
   );
   return updated.rows[0];
 };

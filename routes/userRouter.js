@@ -2,14 +2,17 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
+const multer = require("multer");
 require("dotenv").config();
+
+const upload = multer();
 
 const userController = require("../controllers/userController");
 const workoutController = require("../controllers/workoutController");
 
-router.post("/user", userController.create);
+router.post("/user", upload.none(), userController.create);
 
-router.post("/user/login", userController.login);
+router.post("/user/login", upload.none(), userController.login);
 
 router.get(
   "/user",

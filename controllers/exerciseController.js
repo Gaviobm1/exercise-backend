@@ -3,11 +3,11 @@ const exerciseDb = require("../db/exerciseQueries");
 
 const addExercise = async (req, res, next) => {
   const newExercise = await exerciseDb.postExercise(req.body);
-  return newExercise;
+  return res.json(newExercise);
 };
 
 const deleteExercise = async (req, res, next) => {
-  const id = req.body.exerciseId;
+  const id = req.params.id;
   const deleted = await exerciseDb.deleteExercise(id);
   return res.json(deleted);
 };
@@ -19,7 +19,7 @@ const deleteExercises = async (req, res, next) => {
 };
 
 const updateExercise = async (req, res, next) => {
-  const id = req.body.exerciseId;
+  const id = req.params.id;
   const exerciseData = req.body;
   const updated = await exerciseDb.updateExercise(id, exerciseData);
   return res.json(updated);
@@ -32,9 +32,9 @@ const getExercise = async (req, res, next) => {
 };
 
 const getExercises = async (req, res, next) => {
-  const workoutId = req.body.workoutId;
+  const { workoutId } = req.params;
   const exercises = await exerciseDb.getExercises(workoutId);
-  res.json(exercises);
+  return res.json(exercises);
 };
 
 module.exports = {

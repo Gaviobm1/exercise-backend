@@ -60,9 +60,10 @@ const create = [
         password: hashedPassword,
       };
       if (isNotEmpty(errors)) {
-        res.json({ errors: errors.array() });
+        return res.json({ errors: errors.array() });
       }
       const newUser = await userDb.insertUser(user);
+
       const payload = {
         id: newUser.id,
         email: newUser.email,
@@ -81,7 +82,7 @@ const login = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
   const user = await userDb.findUser(email);
   if (!user) {
-    res.json("User not found");
+    return res.status(401).json({ message: "email or password invalid" });
   }
   bcrypt
     .compare(password, user.password)
@@ -96,9 +97,9 @@ const login = asyncHandler(async (req, res, next) => {
         const token = jwt.sign(payload, process.env.SECRET_KEY, {
           expiresIn: "12h",
         });
-        return res.json({ token });
+        return res.status(200).json({ token });
       } else {
-        return res.json("Invalid credentials");
+        return res.status(401).json({ message: "email or password invalid" });
       }
     })
     .catch((err) => next(err));
